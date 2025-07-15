@@ -1,6 +1,6 @@
 import subprocess
 
-def run_ollama(prompt, model="Model Name"):
+def run_ollama(prompt, model="deepseek-r1:1.5b"):
     try:
 
         process = subprocess.run(
