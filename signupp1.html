@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Sign Up</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #0f172a;
+            color: white;
+        }
+        
+        .bg-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-wrap: wrap;
+            overflow: hidden;
+            z-index: -1;
+            opacity: 0.7;
+        }
+        
+        .bg-animation span {
+            position: relative;
+            display: block;
+            width: calc(6.25% - 2px);
+            height: calc(6.25% - 2px);
+            margin: 1px;
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.1);
+            transition: 1.5s;
+        }
+        
+        .bg-animation span::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.1);
+            transition: all 0.5s;
+        }
+        
+        .bg-animation span:hover::before {
+            width: 200px;
+            height: 200px;
+            transition: 0s;
+        }
+        
+        .login-container {
+            backdrop-filter: blur(10px);
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .input-field {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .input-field:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <div class="bg-animation" id="bgAnimation"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        const LoginPage = () => {
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState('');
+            const [success, setSuccess] = useState(false);
+            
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setError('');
+                
+                try {
+                    const response = await fetch('api/login.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, password }),
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        setSuccess(true);
+                        setTimeout(() => {
+                            // Redirect or do something on successful login
+                            alert('Login successful! Redirecting...');
+                        }, 1000);
+                    } else {
+                        setError(data.message || 'Login failed');
+                    }
+                } catch (err) {
+                    setError('Network error. Please try again.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+            
+            return (
+                <div className="min-h-screen flex items-center justify-center px-4">
+                    <div className="login-container rounded-xl p-8 w-full max-w-md shadow-2xl">
+                        <div className="text-center mb-8">
+                            <h1 className="text-3xl font-bold mb-2">Create Account</h1>
+                            <p className="text-gray-400">Register to access your AI dashboard</p>
+                        </div>
+                        
+                        {error && (
+                            <div className="bg-red-900/50 text-red-200 p-3 rounded-lg mb-4">
+                                {error}
+                            </div>
+                        )}
+                        
+                        {success ? (
+                            <div className="bg-green-900/50 text-green-200 p-3 rounded-lg mb-4">
+                                Login successful! Redirecting...
+                            </div>
+                        ) : (
+                            <form onSubmit={handleSubmit}>
+                                <div className="mb-4">
+                                    <label htmlFor="name" className="block text-gray-400 mb-2">Full Name</label>
+                                    <input
+                                        id="name"
+                                        type="text"
+                                        className="w-full p-3 rounded-lg input-field text-white"
+                                        placeholder="John Doe"
+                                        required
+                                    />
+                                </div>
+                                
+                                <div className="mb-4">
+                                    <label htmlFor="email" className="block text-gray-400 mb-2">Email</label>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full p-3 rounded-lg input-field text-white"
+                                        placeholder="your@email.com"
+                                        required
+                                    />
+                                </div>
+                                
+                                <div className="mb-6">
+                                    <label htmlFor="password" className="block text-gray-400 mb-2">Password</label>
+                                    <input
+                                        id="password"
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="w-full p-3 rounded-lg input-field text-white"
+                                        placeholder="••••••••"
+                                        required
+                                    />
+                                </div>
+                                
+                                <div className="flex items-center justify-between mb-6">
+                                   
+                                    
+                                   
+                                </div>
+                                
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${loading ? 'bg-indigo-800/50 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+                                >
+                                    {loading ? 'Creating account...' : 'Sign Up'}
+                                </button>
+                            </form>
+                        )}
+                        
+                        <div className="mt-6 text-center">
+                            <p className="text-gray-400">Already have an account? <a href="./loginp1.html" className="text-indigo-400 hover:text-indigo-300">Login</a></p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        // Initialize the React app
+        ReactDOM.createRoot(document.getElementById('root')).render(<LoginPage />);
+        
+        // Background animation
+        document.addEventListener('DOMContentLoaded', () => {
+            const bgAnimation = document.getElementById('bgAnimation');
+            const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+{}|:<>?=[];,./~`";
+            
+            // Fill the background with random characters
+            for (let i = 0; i < 256; i++) {
+                const span = document.createElement('span');
+                span.textContent = characters.charAt(Math.floor(Math.random() * characters.length));
+                bgAnimation.appendChild(span);
+            }
+            
+            // Animate the characters
+            setInterval(() => {
+                const spans = document.querySelectorAll('.bg-animation span');
+                spans.forEach(span => {
+                    if (Math.random() > 0.7) {
+                        span.textContent = characters.charAt(Math.floor(Math.random() * characters.length));
+                    }
+                });
+            }, 100);
+        });
+    </script>
+    
+    <!-- PHP API endpoint simulation -->
+    <script type="text/babel">
+        // This is just for demonstration - in a real app, this would be a separate PHP file
+        function mockLoginEndpoint(request) {
+            // Simulated database of users
+            const users = [
+                { email: 'admin@example.com', password: 'password123' },
+                { email: 'user@example.com', password: 'secret321' }
+            ];
+            
+            // Find user
+            const user = users.find(u => 
+                u.email === request.email && 
+                u.password === request.password
+            );
+            
+            if (user) {
+                return {
+                    success: true,
+                    message: 'Login successful',
+                    user: {
+                        email: user.email,
+                        token: 'mock-jwt-token-123456'
+                    }
+                };
+            } else {
+                return {
+                    success: false,
+                    message: 'Invalid email or password'
+                };
+            }
+        }
+        
+        // Mock fetch for demo purposes
+        const originalFetch = window.fetch;
+        window.fetch = async function(url, options) {
+            if (url === 'api/login.php') {
+                const body = JSON.parse(options.body);
+                const result = mockLoginEndpoint(body);
+                
+                return Promise.resolve({
+                    ok: result.success,
+                    json: () => Promise.resolve(result),
+                });
+            }
+            
+            return originalFetch.apply(this, arguments);
+        };
+    </script>
+</body>
+</html>
