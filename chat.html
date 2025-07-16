@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TextGen AI Chat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#343541] text-white h-screen overflow-hidden font-sans flex">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-[#202123] flex flex-col justify-between">
+    <div>
+      <div class="p-4 border-b border-gray-700">
+        <button class="w-full text-left text-white bg-[#444654] hover:bg-[#565869] px-4 py-2 rounded-md">+ New chat</button>
+        <p class="text-sm text-gray-400 mt-4">History is temporarily unavailable. We’re working to restore this feature.</p>
+      </div>
+    </div>
+    <div class="p-4 space-y-4 border-t border-gray-700">
+      <button class="flex items-center text-sm text-gray-200 hover:text-white space-x-2">
+        <span>⚡</span><span>Upgrade to Plus</span>
+        <span class="text-yellow-400 bg-yellow-500 text-xs px-2 py-0.5 rounded">NEW</span>
+      </button>
+      <button class="flex items-center text-sm text-gray-200 hover:text-white space-x-2">
+        <span>🌙</span><span>Dark mode</span>
+      </button>
+      <button class="flex items-center text-sm text-gray-200 hover:text-white space-x-2">
+        <span>❓</span><span>Updates & FAQ</span>
+      </button>
+      <button class="flex items-center text-sm text-gray-200 hover:text-white space-x-2">
+        <span>🚪</span><span>Log out</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Chat Area -->
+  <main class="flex-1 flex flex-col">
+    <!-- Centered Content Area -->
+    <div class="flex-1 overflow-y-auto p-8">
+      <h1 class="text-3xl text-center font-semibold mb-6">TextGen AI</h1>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <!-- Examples -->
+        <div class="bg-[#444654] p-4 rounded-lg">
+          <h2 class="text-lg font-bold mb-2">💡 Examples</h2>
+          <ul class="space-y-2 text-sm text-gray-300">
+            <li>"Explain quantum computing in simple terms" →</li>
+            <li>"Got any creative ideas for a 10 year old’s birthday?" →</li>
+            <li>"How do I make an HTTP request in JavaScript?" →</li>
+          </ul>
+        </div>
+        <!-- Capabilities -->
+        <div class="bg-[#444654] p-4 rounded-lg">
+          <h2 class="text-lg font-bold mb-2">⚡ Capabilities</h2>
+          <ul class="space-y-2 text-sm text-gray-300">
+            <li>Remembers what user said earlier</li>
+            <li>Allows user to provide follow-up corrections</li>
+            <li>Trained to decline inappropriate requests</li>
+          </ul>
+        </div>
+        <!-- Limitations -->
+        <div class="bg-[#444654] p-4 rounded-lg">
+          <h2 class="text-lg font-bold mb-2">⚠️ Limitations</h2>
+          <ul class="space-y-2 text-sm text-gray-300">
+            <li>May occasionally generate incorrect information</li>
+            <li>May produce biased or harmful content</li>
+            <li>Limited knowledge after 2021</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Input -->
+    <form class="p-4 bg-[#40414f] border-t border-gray-700 flex">
+      <input
+        type="text"
+        placeholder="Send a message..."
+        class="flex-1 px-4 py-3 bg-[#343541] text-white rounded-md focus:outline-none"
+      />
+      <button type="submit" class="ml-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 rounded-md">
+        ➤
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <footer class="text-xs text-center text-gray-400 py-2 bg-[#343541]">
+      TextGen AI – Powered by Ollama | Inspired by ChatGPT UI
+    </footer>
+  </main>
+</body>
+</html>

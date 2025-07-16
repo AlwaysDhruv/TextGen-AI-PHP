@@ -146,29 +146,23 @@
                         )}
                         
                         <div className="mt-6 text-center">
-                            <p className="text-gray-400">Back to <a href="./loginp1.html" className="text-indigo-400 hover:text-indigo-300">login</a></p>
+                            <p className="text-gray-400">Back to <a href="./login.html" className="text-indigo-400 hover:text-indigo-300">login</a></p>
                         </div>
                     </div>
                 </div>
             );
         };
         
-        // Initialize the React app
         ReactDOM.createRoot(document.getElementById('root')).render(<LoginPage />);
         
-        // Background animation
         document.addEventListener('DOMContentLoaded', () => {
             const bgAnimation = document.getElementById('bgAnimation');
             const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+{}|:<>?=[];,./~`";
-            
-            // Fill the background with random characters
             for (let i = 0; i < 256; i++) {
                 const span = document.createElement('span');
                 span.textContent = characters.charAt(Math.floor(Math.random() * characters.length));
                 bgAnimation.appendChild(span);
             }
-            
-            // Animate the characters
             setInterval(() => {
                 const spans = document.querySelectorAll('.bg-animation span');
                 spans.forEach(span => {
@@ -180,17 +174,13 @@
         });
     </script>
     
-    <!-- PHP API endpoint simulation -->
     <script type="text/babel">
-        // This is just for demonstration - in a real app, this would be a separate PHP file
         function mockLoginEndpoint(request) {
-            // Simulated database of users
             const users = [
                 { email: 'admin@example.com', password: 'password123' },
                 { email: 'user@example.com', password: 'secret321' }
             ];
             
-            // Find user
             const user = users.find(u => 
                 u.email === request.email && 
                 u.password === request.password
@@ -213,7 +203,6 @@
             }
         }
         
-        // Mock fetch for demo purposes
         const originalFetch = window.fetch;
         window.fetch = async function(url, options) {
             if (url === 'api/login.php') {

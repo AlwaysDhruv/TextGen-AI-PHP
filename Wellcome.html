@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TextGen AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    #tsparticles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #111827;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #3b82f6;
+      border-radius: 10px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-black text-white h-screen overflow-y-auto flex flex-col relative">
+
+  <div id="tsparticles"></div>
+
+  <nav class="flex justify-between items-center p-6 bg-black bg-opacity-80 backdrop-blur z-10 border-b border-gray-800">
+    <div>
+      <a href="./contact.html" class="text-white hover:text-blue-400 font-medium rounded-lg px-3 py-2 transition">Contact Us</a>
+    </div>
+    <div class="space-x-4">
+      <a href="./signup.html" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">Sign Up</a>
+      <a href="./login.html" class="text-white hover:text-blue-400 underline px-3 py-2 transition">Sign In</a>
+    </div>
+  </nav>
+
+  <main class="flex-grow text-center px-4 z-10">
+    <div class="py-20">
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Welcome to TextGen AI</h1>
+      <p class="text-lg text-gray-300 mb-6">Generate intelligent and creative text using the power of GPT models.</p>
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <a href="./login.html" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">Get Started</a>
+        <a href="/try" class="border border-blue-500 text-blue-400 px-6 py-3 rounded-lg hover:bg-blue-600 hover:text-white transition">Try It</a>
+      </div>
+    </div>
+
+    <div class="py-12 max-w-4xl mx-auto text-left">
+      <h2 class="text-3xl font-bold mb-4 text-white text-center">About Us</h2>
+      <p class="text-gray-400 text-lg">
+        TextGen AI is a cutting-edge platform that leverages the power of GPT-based models to help users generate high-quality text for a wide variety of applications. Whether you're a content creator, student, business professional, developer, or casual user, our tools are designed to be intuitive and powerful, meeting the needs of anyone who wants to communicate more effectively with the help of artificial intelligence.<br><br>
+
+        Built on top of state-of-the-art transformer models, TextGen AI allows you to compose blog posts, write essays, brainstorm creative content, automate writing tasks, and much more — all with just a few clicks. Our mission is to democratize AI-powered writing by providing an accessible, responsive, and efficient platform that adapts to your unique style and voice.
+      </p>
+    </div>
+
+    <div class="py-12 max-w-4xl mx-auto">
+      <h2 class="text-3xl font-bold mb-4 text-white text-center">What Can TextGen AI Do?</h2>
+      <ul class="text-left text-gray-300 space-y-4 max-w-xl mx-auto">
+        <li><i class="fas fa-check text-blue-500 mr-2"></i>Generate articles, blog posts, and marketing content.</li>
+        <li><i class="fas fa-check text-blue-500 mr-2"></i>Create product descriptions and e-commerce listings.</li>
+        <li><i class="fas fa-check text-blue-500 mr-2"></i>Answer user queries with natural language understanding.</li>
+        <li><i class="fas fa-check text-blue-500 mr-2"></i>Summarize long reports or documents into key insights.</li>
+        <li><i class="fas fa-check text-blue-500 mr-2"></i>Compose professional emails, messages, and responses.</li>
+        <li><i class="fas fa-check text-blue-500 mr-2"></i>Translate text and support multilingual conversations.</li>
+        <li><i class="fas fa-check text-blue-500 mr-2"></i>Generate stories, poems, dialogues, and creative scripts.</li>
+        <li><i class="fas fa-check text-blue-500 mr-2"></i>Assist developers by generating code snippets or explanations.</li>
+        <li><i class="fas fa-check text-blue-500 mr-2"></i>Provide grammar correction and text rewriting suggestions.</li>
+        <li><i class="fas fa-check text-blue-500 mr-2"></i>Help students brainstorm ideas, outlines, and complete assignments.</li>
+      </ul>
+    </div>
+  </main>
+
+  <script>
+    tsParticles.load("tsparticles", {
+      background: { color: { value: "#000000" } },
+      particles: {
+        number: { value: 60, density: { enable: true, area: 800 } },
+        color: { value: "#ffffff" },
+        shape: { type: "circle" },
+        opacity: { value: 0.5 },
+        size: { value: 3 },
+        move: {
+          enable: true,
+          speed: 1,
+          direction: "none",
+          outMode: "out"
+        },
+        links: {
+          enable: true,
+          distance: 150,
+          color: "#3b82f6",
+          opacity: 0.3,
+          width: 1
+        }
+      },
+      interactivity: {
+        events: {
+          onhover: { enable: true, mode: "grab" }
+        },
+        modes: {
+          grab: {
+            distance: 200,
+            line_linked: { opacity: 0.5 }
+          }
+        }
+      },
+      retina_detect: true
+    });
+  </script>
+</body>
+</html>
