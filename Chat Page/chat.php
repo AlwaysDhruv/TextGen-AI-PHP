@@ -45,17 +45,16 @@
                     <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
                     <div class="chat-title">TextGen-AI</div>
                 </div>
-                <div class="profile-section">
-                    <div class="profile-icon" onclick="toggleProfile()">U</div>
-                    <button class="logout-btn" onclick="logout()">Logout</button>
-                </div>
+
+                <!-- 👇 Include PHP section here -->
+                <?php include("icon.php"); ?>
             </div>
 
             <div class="chat-messages" id="chatMessages">
                 <div class="message">
                     <div class="message-avatar ai">AI</div>
                     <div class="message-content">
-                        Hello! I'm your AI assistant. How can I help you today?
+                        Hello 👋 I'm your AI assistant. How can I help you today?
                     </div>
                 </div>
             </div>
