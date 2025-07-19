@@ -1,80 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern AI Chat</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="chat-container">
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-title">Chat History</div>
-                <button class="close-sidebar" onclick="toggleSidebar()">×</button>
-            </div>
-            <div class="chat-history">
-                <div class="chat-item active">
-                    <div class="chat-item-title">AI Assistant Chat</div>
-                    <div class="chat-item-preview">How can I help you today?</div>
-                </div>
-                <div class="chat-item">
-                    <div class="chat-item-title">Code Review</div>
-                    <div class="chat-item-preview">Can you review this JavaScript code?</div>
-                </div>
-                <div class="chat-item">
-                    <div class="chat-item-title">Writing Help</div>
-                    <div class="chat-item-preview">I need help with my essay...</div>
-                </div>
-                <div class="chat-item">
-                    <div class="chat-item-title">Data Analysis</div>
-                    <div class="chat-item-preview">Analyze this dataset please</div>
-                </div>
-                <div class="chat-item">
-                    <div class="chat-item-title">Creative Writing</div>
-                    <div class="chat-item-preview">Write a short story about...</div>
-                </div>
-            </div>
-        </div>
+<?php
+header("Content-Type: application/json");
 
-        <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["prompt"])) {
+    $prompt = escapeshellarg($_POST["prompt"]);
+    $command = "echo $prompt | ollama run gemma:2b";
+    $output = shell_exec($command);
 
-        <div class="main-chat">
-            <div class="chat-header">
-                <div class="header-left">
-                    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
-                    <div class="chat-title">TextGen-AI</div>
-                </div>
-
-                <!-- 👇 Include PHP section here -->
-                <?php include("icon.php"); ?>
-            </div>
-
-            <div class="chat-messages" id="chatMessages">
-                <div class="message">
-                    <div class="message-avatar ai">AI</div>
-                    <div class="message-content">
-                        Hello 👋 I'm your AI assistant. How can I help you today?
-                    </div>
-                </div>
-            </div>
-
-            <div class="input-area">
-                <div class="input-container">
-                    <textarea 
-                        class="message-input" 
-                        id="messageInput"
-                        placeholder="Type your message here..."
-                        rows="1"
-                        onkeypress="handleKeyPress(event)"
-                        oninput="autoResize(this)"
-                    ></textarea>
-                    <button class="send-btn" onclick="sendMessage()">➤</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
+    echo json_encode(["response" => $output]);
+    exit;
+}
+echo json_encode(["response" => "Invalid request."]);
+?>
