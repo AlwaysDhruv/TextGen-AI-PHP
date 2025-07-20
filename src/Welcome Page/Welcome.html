@@ -6,18 +6,20 @@
   <title>TextGen AI</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body class="bg-black text-white h-screen overflow-y-auto flex flex-col relative">
+<body class="text-white h-screen overflow-y-auto flex flex-col relative">
 
-  <div id="tsparticles"></div>
+  <!-- Background Animation -->
+  <div id="tsparticles" class="absolute inset-0 -z-10"></div>
 
-  <nav class="flex justify-between items-center p-6 bg-black bg-opacity-80 backdrop-blur z-10 border-b border-gray-800">
+  <!-- Navigation Bar -->
+  <nav class="flex justify-between items-center p-6 bg-black/60 backdrop-blur-md z-10 border-b border-gray-800">
     <div>
-      <a href="../Contact Page/contact.html" class="text-white hover:text-blue-400 font-medium rounded-lg px-3 py-2 transition">Contact Us</a>
+      <a href="../Contact Page/Contact.html" class="text-white hover:text-blue-400 font-bold text-xl tracking-wide flex items-center gap-2 transition">
+        <i class="fas fa-code text-blue-500"></i> Developers
+      </a>
     </div>
     <div class="space-x-4">
       <a href="../Sign Page/signup.html" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">Sign Up</a>
@@ -25,6 +27,7 @@
     </div>
   </nav>
 
+  <!-- Main Content -->
   <main class="flex-grow text-center px-4 z-10">
     <div class="py-20">
       <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Welcome to TextGen AI</h1>
@@ -35,18 +38,19 @@
       </div>
     </div>
 
+    <!-- About Section -->
     <div class="py-12 max-w-4xl mx-auto text-left">
       <h2 class="text-3xl font-bold mb-4 text-white text-center">About Us</h2>
-      <p class="text-gray-400 text-lg">
+      <p class="text-gray-300 text-lg bg-black/40 p-6 rounded-lg backdrop-blur-md">
         TextGen AI is a cutting-edge platform that leverages the power of GPT-based models to help users generate high-quality text for a wide variety of applications. Whether you're a content creator, student, business professional, developer, or casual user, our tools are designed to be intuitive and powerful, meeting the needs of anyone who wants to communicate more effectively with the help of artificial intelligence.<br><br>
-
         Built on top of state-of-the-art transformer models, TextGen AI allows you to compose blog posts, write essays, brainstorm creative content, automate writing tasks, and much more — all with just a few clicks. Our mission is to democratize AI-powered writing by providing an accessible, responsive, and efficient platform that adapts to your unique style and voice.
       </p>
     </div>
 
+    <!-- Features Section -->
     <div class="py-12 max-w-4xl mx-auto">
       <h2 class="text-3xl font-bold mb-4 text-white text-center">What Can TextGen AI Do?</h2>
-      <ul class="text-left text-gray-300 space-y-4 max-w-xl mx-auto">
+      <ul class="text-left text-gray-200 space-y-4 max-w-xl mx-auto bg-black/40 p-6 rounded-lg backdrop-blur-md">
         <li><i class="fas fa-check text-blue-500 mr-2"></i>Generate articles, blog posts, and marketing content.</li>
         <li><i class="fas fa-check text-blue-500 mr-2"></i>Create product descriptions and e-commerce listings.</li>
         <li><i class="fas fa-check text-blue-500 mr-2"></i>Answer user queries with natural language understanding.</li>
@@ -59,8 +63,73 @@
         <li><i class="fas fa-check text-blue-500 mr-2"></i>Help students brainstorm ideas, outlines, and complete assignments.</li>
       </ul>
     </div>
-  </main>
 
+    <!-- Contact Us Section -->
+<!-- Inside your Contact Us section -->
+<div class="py-12 max-w-3xl mx-auto px-4">
+  <h2 class="text-3xl font-bold mb-4 text-white text-center">Contact Us</h2>
+  <p class="text-gray-300 text-lg mb-6 text-center">
+    Have questions, feedback, or feature requests? We'd love to hear from you.
+  </p>
+
+  <!-- 🌀 Loading Spinner -->
+  <div id="loadingSpinner" class="hidden text-center text-blue-400 font-semibold mb-4">
+    <i class="fas fa-spinner fa-spin mr-2"></i> Sending message...
+  </div>
+
+  <!-- Contact Form -->
+  <form id="contactForm" class="bg-black/50 backdrop-blur-md p-6 rounded-lg shadow-md space-y-4">
+    <div>
+      <label for="name" class="block text-gray-300 mb-1">Your Name</label>
+      <input type="text" id="name" name="name" class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500" required>
+    </div>
+    <div>
+      <label for="email" class="block text-gray-300 mb-1">Your Email</label>
+      <input type="email" id="email" name="email" class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500" required>
+    </div>
+    <div>
+      <label for="message" class="block text-gray-300 mb-1">Your Message</label>
+      <textarea id="message" name="message" rows="4" class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500" required></textarea>
+    </div>
+    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition">
+      Send Message
+    </button>
+  </form>
+
+  <!-- JS to show spinner while sending -->
+  <script>
+    document.getElementById("contactForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const form = this;
+      const loading = document.getElementById("loadingSpinner");
+
+      loading.classList.remove("hidden");
+
+      const formData = new FormData(form);
+      try {
+        const response = await fetch("contact.php", {
+          method: "POST",
+          body: formData
+        });
+        const result = await response.json();
+        alert(result.message);
+        if (result.success) form.reset();
+      } catch (err) {
+        alert("Something went wrong. Please try again.");
+      } finally {
+        loading.classList.add("hidden");
+      }
+    });
+  </script>
+</div>
+</main>
+
+  <!-- Footer -->
+  <footer class="text-center text-gray-400 text-sm py-6 border-t border-gray-800 bg-black/60 backdrop-blur z-10">
+    Powered by <span class="text-blue-500 font-semibold">TextGen-AI</span>
+  </footer>
+
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
   <script src="script.js"></script>
 </body>
