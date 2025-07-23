@@ -31,14 +31,16 @@
           <div class="chat-title">TextGen-AI</div>
         </div>
 
-        <!-- Icon and Logout from PHP -->
         <?php include("icon.php"); ?>
       </div>
 
       <div class="chat-messages" id="chatMessages">
         <div class="message">
           <div class="message-avatar ai">TG</div>
-          <div class="message-content">Hello 👋 I'm your AI assistant. How can I help you today?</div>
+          <div class="message-content">
+            <span class="message-text">Hello 👋 I'm your AI assistant. How can I help you today?</span>
+            <span class="copy-btn" onclick="copyMessage(this)">📋</span>
+          </div>
         </div>
       </div>
 

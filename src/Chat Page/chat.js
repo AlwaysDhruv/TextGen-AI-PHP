@@ -3,58 +3,62 @@ function toggleSidebar() {
   document.getElementById("overlay").classList.toggle("active");
 }
 
+function autoResize(textarea) {
+  textarea.style.height = "auto";
+  textarea.style.height = textarea.scrollHeight + "px";
+}
+
 function handleKeyPress(event) {
   if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();
-    document.getElementById("chatForm").requestSubmit();
+    document.getElementById("chatForm").dispatchEvent(new Event("submit"));
   }
 }
 
-function autoResize(textarea) {
-  textarea.style.height = 'auto';
-  textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+function copyMessage(button) {
+  const text = button.previousElementSibling.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    button.textContent = "✅";
+    setTimeout(() => {
+      button.textContent = "📋";
+    }, 1000);
+  });
 }
 
-document.getElementById("chatForm").addEventListener("submit", async function (e) {
+document.getElementById("chatForm").addEventListener("submit", function (e) {
   e.preventDefault();
   const input = document.getElementById("messageInput");
   const message = input.value.trim();
   if (!message) return;
 
-  addMessage(message, 'user');
-  input.value = '';
-  input.style.height = 'auto';
+const userMsg = document.createElement("div");
+userMsg.className = "message user";
+userMsg.innerHTML = `
+  <div class="message-avatar user">You</div>
+  <div class="message-content"><span class="message-text">${message}</span></div>`;
+document.getElementById("chatMessages").appendChild(userMsg);
 
-  const aiMsg = addMessage('', 'ai');
+  input.value = "";
+  autoResize(input);
 
-  const response = await fetch("chat.php", {
+  fetch("chat.php", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: "prompt=" + encodeURIComponent(message)
-  });
-
-  const data = await response.json();
-  if (data.response) {
-    typeWriter(aiMsg.querySelector(".message-content"), data.response.trim());
-  }
+  })
+    .then(res => res.json())
+    .then(data => {
+      const aiMsg = document.createElement("div");
+      aiMsg.className = "message";
+      aiMsg.innerHTML = `
+        <div class="message-avatar ai">TG</div>
+        <div class="message-content">
+          <span class="message-text">${data.response}</span>
+          <span class="copy-btn" onclick="copyMessage(this)">📋</span>
+        </div>`;
+      document.getElementById("chatMessages").appendChild(aiMsg);
+    })
+    .catch(err => {
+      console.error("Error:", err);
+    });
 });
-
-function addMessage(text, sender) {
-  const chatMessages = document.getElementById("chatMessages");
-  const msg = document.createElement("div");
-  msg.className = `message ${sender}`;
-  msg.innerHTML = `
-    <div class="message-avatar ${sender}">${sender === 'user' ? 'U' : 'AI'}</div>
-    <div class="message-content">${text.replace(/\n/g, '<br>')}</div>
-  `;
-  chatMessages.appendChild(msg);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-  return msg;
-}
-
-function typeWriter(element, text, i = 0) {
-  if (i < text.length) {
-    element.innerHTML += text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
-    setTimeout(() => typeWriter(element, text, i + 1), 15);
-  }
-}
