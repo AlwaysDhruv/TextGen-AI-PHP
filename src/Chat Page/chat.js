@@ -15,16 +15,19 @@ function handleKeyPress(event) {
   }
 }
 
-function copyMessage(button) {
-  const text = button.previousElementSibling.innerText;
-  navigator.clipboard.writeText(text).then(() => {
-    button.textContent = "✅";
+function copyMessage(btn) {
+  // Get the message text element (assumes it's just before the button)
+  const textToCopy = btn.parentElement.querySelector(".message-text")?.innerText;
+  if (!textToCopy) return;
+
+  navigator.clipboard.writeText(textToCopy).then(() => {
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = "✅";
     setTimeout(() => {
-      button.textContent = "📋";
-    }, 1000);
+      btn.innerHTML = originalHTML;
+    }, 1500);
   });
 }
-
 document.getElementById("chatForm").addEventListener("submit", function (e) {
   e.preventDefault();
   const input = document.getElementById("messageInput");

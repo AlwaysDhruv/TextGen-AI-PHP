@@ -371,21 +371,20 @@ body {
         padding: 16px;
     }
 }
-.copy-btn {
-  cursor: pointer;
-  margin-left: 10px;
-  font-size: 14px;
-  color: #666;
-}
-
-.copy-btn:hover {
-  color: #000;
-}
-
 .message-content {
   position: relative;
 }
 
-.message-text {
-  display: inline;
+.copy-btn {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.message-content:hover .copy-btn {
+  opacity: 1;
+  visibility: visible;
 }

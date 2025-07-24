@@ -36,10 +36,15 @@
 
       <div class="chat-messages" id="chatMessages">
         <div class="message">
-          <div class="message-avatar ai">TG</div>
+          <div class="message-avatar ai">TGI</div>
           <div class="message-content">
             <span class="message-text">Hello 👋 I'm your AI assistant. How can I help you today?</span>
-            <span class="copy-btn" onclick="copyMessage(this)">📋</span>
+            <button class="copy-btn tooltip" onclick="copyMessage(this)" title="Copy to clipboard">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1z"/>
+                <path d="M20 5H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h12v14z"/>
+              </svg>
+            </button>
           </div>
         </div>
       </div>
