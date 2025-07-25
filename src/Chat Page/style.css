@@ -376,15 +376,28 @@ body {
 }
 
 .copy-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
   opacity: 0;
-  visibility: hidden;
   transition: opacity 0.2s ease;
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 0.5rem;
+  right: 0.5rem;
 }
 
 .message-content:hover .copy-btn {
   opacity: 1;
-  visibility: visible;
+}
+
+.copy-btn img {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0.8);
+  transition: filter 0.2s ease;
+}
+
+.copy-btn:hover img {
+  filter: brightness(1);
 }

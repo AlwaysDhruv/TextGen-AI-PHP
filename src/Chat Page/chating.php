@@ -30,17 +30,16 @@
           <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
           <div class="chat-title">TextGen-AI</div>
         </div>
-
         <?php include("icon.php"); ?>
       </div>
 
       <div class="chat-messages" id="chatMessages">
-        <div class="message">
+        <div class="message output-wrapper">
           <div class="message-avatar ai">TGI</div>
           <div class="message-content">
-            <span class="message-text">Hello 👋 I'm your AI assistant. How can I help you today?</span>
+            <pre class="output-content message-text">Hello 👋 I'm your AI assistant. How can I help you today?</pre>
             <button class="copy-btn tooltip" onclick="copyMessage(this)" title="Copy to clipboard">
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                 <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1z"/>
                 <path d="M20 5H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h12v14z"/>
               </svg>

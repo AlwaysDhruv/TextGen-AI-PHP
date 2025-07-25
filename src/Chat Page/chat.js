@@ -15,31 +15,38 @@ function handleKeyPress(event) {
   }
 }
 
-function copyMessage(btn) {
-  // Get the message text element (assumes it's just before the button)
-  const textToCopy = btn.parentElement.querySelector(".message-text")?.innerText;
-  if (!textToCopy) return;
-
-  navigator.clipboard.writeText(textToCopy).then(() => {
-    const originalHTML = btn.innerHTML;
-    btn.innerHTML = "✅";
-    setTimeout(() => {
-      btn.innerHTML = originalHTML;
-    }, 1500);
-  });
+function scrollToBottom() {
+  const chatMessages = document.getElementById("chatMessages");
+  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+
+function createMessageElement(type, messageText) {
+  const msg = document.createElement("div");
+  msg.className = `message ${type === 'user' ? 'user' : ''}`;
+  const avatar = type === 'user' ? 'You' : 'TG';
+  const icon = type === 'user' ? '' : `
+    <button class="copy-btn tooltip" onclick="copyMessage(this)" title="Copy to clipboard">
+      <img src="8001449.png" alt="Copy" class="copy-icon" />
+    </button>`;
+
+  msg.innerHTML = `
+    <div class="message-avatar ${type}">${avatar}</div>
+    <div class="message-content">
+      <span class="message-text">${messageText}</span>
+      ${icon}
+    </div>`;
+  return msg;
+}
+
 document.getElementById("chatForm").addEventListener("submit", function (e) {
   e.preventDefault();
   const input = document.getElementById("messageInput");
   const message = input.value.trim();
   if (!message) return;
 
-const userMsg = document.createElement("div");
-userMsg.className = "message user";
-userMsg.innerHTML = `
-  <div class="message-avatar user">You</div>
-  <div class="message-content"><span class="message-text">${message}</span></div>`;
-document.getElementById("chatMessages").appendChild(userMsg);
+  const userMsg = createMessageElement('user', message);
+  document.getElementById("chatMessages").appendChild(userMsg);
+  scrollToBottom();
 
   input.value = "";
   autoResize(input);
@@ -51,17 +58,29 @@ document.getElementById("chatMessages").appendChild(userMsg);
   })
     .then(res => res.json())
     .then(data => {
-      const aiMsg = document.createElement("div");
-      aiMsg.className = "message";
-      aiMsg.innerHTML = `
-        <div class="message-avatar ai">TG</div>
-        <div class="message-content">
-          <span class="message-text">${data.response}</span>
-          <span class="copy-btn" onclick="copyMessage(this)">📋</span>
-        </div>`;
+      const aiMsg = createMessageElement('ai', data.response);
       document.getElementById("chatMessages").appendChild(aiMsg);
+      scrollToBottom();
     })
     .catch(err => {
       console.error("Error:", err);
     });
 });
+
+function copyMessage(button) {
+  const output = button.parentElement.querySelector(".message-text");
+  const text = output.innerText || output.textContent;
+  const img = button.querySelector("img");
+
+  navigator.clipboard.writeText(text).then(() => {
+    img.src = "1621635.png"; // success icon
+    img.alt = "Copied";
+
+    setTimeout(() => {
+      img.src = "8001449.png"; // restore icon
+      img.alt = "Copy";
+    }, 1500);
+  }).catch(err => {
+    console.error("Copy failed:", err);
+  });
+}
