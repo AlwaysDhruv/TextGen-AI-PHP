@@ -145,6 +145,34 @@
       for (let i = 0; i < 256; i++) {
         document.write("<span>*</span>");
       }
+    function validateForm() {
+      let isValid = true;
+
+      const name = document.getElementById("Full Name").value.trim();
+      const email = document.getElementById("Email Address").value.trim();
+      const password = document.getElementById("Password").value;
+
+      // Reset errors
+      document.getElementById("nameError").textContent = "";
+      document.getElementById("emailError").textContent = "";
+      document.getElementById("passwordError").textContent = "";
+
+      // Name: Only digits
+      if (!/^\d+$/.test(name)) {
+        document.getElementById("nameError").textContent = "Name must contain only numbers.";
+        isValid = false;
+      }
+
+      // Email validation
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
+      if (!emailPattern.test(email)) {
+        document.getElementById("emailError").textContent = "Enter a valid email address.";
+        isValid = false;
+      }
+
+      // Strong Password Validation
+ 
+  }
     </script>
   </div>
 
@@ -152,9 +180,9 @@
     <div class="login-container">
       <h2>Create Account</h2>
       <form method="POST" action="signup.php">
-        <input class="input-field" type="text" name="name" placeholder="Full Name" required>
+        <input class="input-field" type="text" name="name" placeholder="Full Name" required  oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
         <input class="input-field" type="email" name="email" placeholder="Email Address" required>
-        <input class="input-field" type="password" name="password" placeholder="Password" required>
+        <input  class="input-field" type="password" id="password" name="password"  placeholder="password"  pattern="(?=.\d)(?=.[a-z])(?=.[A-Z])(?=.[!@#$%^&*_=+-]).{8,}"  title="Make strong password" required>
         <button type="submit">Sign Up</button>
       </form>
       <div class="redirect-link">
