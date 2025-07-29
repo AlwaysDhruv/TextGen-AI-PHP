@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sign Up</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     body {
@@ -135,6 +136,15 @@
     .redirect-link a:hover {
       text-decoration: underline;
     }
+
+    .error {
+      color: red;
+      font-size: 0.9rem;
+      margin-top: -0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    =======
   </style>
 </head>
 <body>
@@ -145,21 +155,64 @@
       for (let i = 0; i < 256; i++) {
         document.write("<span>*</span>");
       }
+    </script>
+  </div>
+
+  <div class="signup-wrapper">
+    <div class="login-container">
+      <h2>Create Account</h2>
+      <form method="POST" action="signup.php" onsubmit="return validateForm()">
+        <input class="input-field" type="text" id="fullName" name="name" placeholder="Full Name" required oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
+        <div id="nameError" class="error"></div>
+        
+        <input class="input-field" type="email" id="email" name="email" placeholder="Email Address" required>
+        <div id="emailError" class="error"></div>
+        
+        <div style="position: relative;">
+          <input class="input-field" type="password" id="password" name="password" placeholder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_=+-]).{8,}" title="Make a strong password" required style="padding-right: 10px;">
+          <i id="togglePassword" class="far fa-eye" style="position: absolute; right: 5px; top: 40%; transform: translateY(-50%); cursor: pointer; color: #94a3b8; font-size: 1rem;"></i>
+        </div>
+        <div id="passwordError" class="error" style="margin-top: -0.8rem;"></div>
+        
+        <button type="submit">Sign Up</button>
+      </form>
+      <div class="redirect-link">
+        Already have an account? <a href="../Login Page/Login.html">Login</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('togglePassword').addEventListener('click', function() {
+      const password = document.getElementById('password');
+      if (password.type === 'password') {
+        password.type = 'text';
+        this.classList.remove('fa-eye');
+        this.classList.add('fa-eye-slash');
+        this.style.color = '#6366f1';
+      } else {
+        password.type = 'password';
+        this.classList.remove('fa-eye-slash');
+        this.classList.add('fa-eye');
+        this.style.color = '#94a3b8';
+      }
+    });
+
     function validateForm() {
       let isValid = true;
 
-      const name = document.getElementById("Full Name").value.trim();
-      const email = document.getElementById("Email Address").value.trim();
-      const password = document.getElementById("Password").value;
+      const name = document.getElementById("fullName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
 
       // Reset errors
       document.getElementById("nameError").textContent = "";
       document.getElementById("emailError").textContent = "";
       document.getElementById("passwordError").textContent = "";
 
-      // Name: Only digits
-      if (!/^\d+$/.test(name)) {
-        document.getElementById("nameError").textContent = "Name must contain only numbers.";
+      // Name: Only letters and spaces
+      if (!/^[a-zA-Z\s]+$/.test(name)) {
+        document.getElementById("nameError").textContent = "Name must contain only letters.";
         isValid = false;
       }
 
@@ -171,25 +224,14 @@
       }
 
       // Strong Password Validation
- 
-  }
-    </script>
-  </div>
+      const passwordPattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_=+-]).{8,}$/;
+      if (!passwordPattern.test(password)) {
+        document.getElementById("passwordError").textContent = "Password must be at least 8 characters long and include a number, an uppercase letter, a lowercase letter, and a special character.";
+        isValid = false;
+      }
 
-  <div class="signup-wrapper">
-    <div class="login-container">
-      <h2>Create Account</h2>
-      <form method="POST" action="signup.php">
-        <input class="input-field" type="text" name="name" placeholder="Full Name" required  oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
-        <input class="input-field" type="email" name="email" placeholder="Email Address" required>
-        <input  class="input-field" type="password" id="password" name="password"  placeholder="password"  pattern="(?=.\d)(?=.[a-z])(?=.[A-Z])(?=.[!@#$%^&*_=+-]).{8,}"  title="Make strong password" required>
-        <button type="submit">Sign Up</button>
-      </form>
-      <div class="redirect-link">
-        Already have an account? <a href="../Login Page/Login.html">Login</a>
-      </div>
-    </div>
-  </div>
-
+      return isValid;
+    }
+  </script>
 </body>
 </html>
