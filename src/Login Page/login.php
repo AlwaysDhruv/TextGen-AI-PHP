@@ -32,7 +32,7 @@ try {
                 $_SESSION['name'] = $name;
 
                 // ✅ Redirect to PHP page that can access session data
-                header("Location: ../Chat Page/chating.php");
+                header("Location: ../Chat Page/index.html");
                 exit();
             } else {
                 echo "<script>alert('❌ Incorrect password.'); window.location.href = 'login.html';</script>";

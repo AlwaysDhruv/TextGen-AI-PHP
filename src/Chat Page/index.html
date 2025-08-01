@@ -1,399 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TextGen-AI Local Chat</title>
-    <!-- Inline CSS starts here -->
-    <style>
-        /* General Body and Container Styling */
-        body {
-            font-family: 'Inter', sans-serif; /* Ensure Inter font is applied */
-            background-color: #000000; /* Solid black background */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow: hidden; /* Prevent body scroll during transition */
-            color: #ffffff; /* Default text color to white for dark background */
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TextGen-AI Local Chat</title>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      color: #fff;
+      overflow: hidden;
+    }
 
-        /* Fixed Header Styling - now outside chat-container */
-        .header {
-            position: fixed; /* Always fixed to the viewport */
-            top: 5px; /* Spacing from the top of the viewport */
-            left: 50%;
-            transform: translateX(-50%); /* Center horizontally */
-            width: calc(100% - 0px); /* Adjusted to fill more width by setting to 100% of available space */
-            max-width: 10000px; /* Match chat-container max-width */
-            background: rgba(0, 0, 0, 0.5); /* Dark charcoal with 50% opacity */
-            color: white;
-            padding: 15px 20px; /* Reduced horizontal padding from 30px to 15px */
-            text-align: center;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle white border for contrast */
-            border-radius: 16px 16px 0 0; /* Apply top border radius */
-            z-index: 10;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Keep shadow */
-            box-sizing: border-box; /* Important for width calculation with padding */
-        }
+    .header {
+      position: fixed;
+      top: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 10000px;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px 16px 0 0;
+      z-index: 10;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
 
-        .header h1 {
-            margin: 0;
-            font-size: 1.8em;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
+    .header h1 {
+      margin: 0;
+      font-size: 1.8em;
+      font-weight: 700;
+    }
 
-        .model-selection label {
-            margin-right: 12px;
-            font-size: 0.95em;
-            font-weight: 500;
-        }
+    .model-selection label {
+      margin-right: 12px;
+      font-size: 0.95em;
+    }
 
-        .model-selection select {
-            padding: 9px 15px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.3); /* Lighter gray border for contrast */
-            background-color: rgba(255, 255, 255, 0.1); /* Very subtle white transparent background */
-            color: rgb(6, 6, 6);
-            font-size: 0.95em;
-            cursor: pointer;
-            appearance: none;
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2C114.7L154.7%2C247c-2.5%2C2.5-5.6%2C3.7-8.7%2C3.7s-6.2-1.2-8.7-3.7L5.4%2C114.7c-5.1-5.1-5.1-13.3%2C0-18.4c5.1-5.1%2C13.3-5.1%2C18.4%2C0l130.4%2C130.4l130.4-130.4c5.1-5.1%2C13.3-5.1%2C18.4%2C0C292.1%2C101.4%2C292.1%2C109.6%2C287%2C114.7z%22%2F%3E%3C%2Fsvg%3E');
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 14px;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
+    .model-selection select {
+      padding: 9px 15px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background-color: rgba(255, 255, 255, 0.1);
+      color: rgb(121, 118, 118);
+      font-size: 0.95em;
+      cursor: pointer;
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 14px;
+    }
 
-        .model-selection select:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
+    .chat-container {
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 750px;
+      min-height: 550px;
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+    }
 
-        .chat-container {
-            background-color: rgba(0, 0, 0, 0.2); /* Dark transparent container */
-            border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); /* Stronger, darker shadow */
-            width: 100%;
-            max-width: 750px;
-            min-height: 550px;
-            max-height: 90vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
-            margin-top: 20px; /* Push container down to clear fixed header */
-        }
+    .initial-prompt-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      flex-grow: 1;
+      text-align: center;
+    }
 
-        /* Initial Prompt Container */
-        .initial-prompt-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 30px;
-            flex-grow: 1;
-            width: 100%;
-            box-sizing: border-box;
-            transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
+    .initial-prompt-container h2 {
+      font-size: 2.8em;
+      color: #fff;
+      margin-bottom: 25px;
+      font-weight: 800;
+    }
 
-        .initial-prompt-container h2 {
-            font-size: 2.8em;
-            color: #ffffff; /* White text for greeting */
-            margin-bottom: 25px;
-            font-weight: 800;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-        }
+    .initial-input {
+      display: flex;
+      width: 85%;
+      max-width: 450px;
+      gap: 12px;
+    }
 
-        .initial-input {
-            display: flex;
-            width: 85%;
-            max-width: 450px;
-            gap: 12px;
-        }
+    .initial-input input,
+    .chat-input input {
+      flex-grow: 1;
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-size: 1.1em;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
 
-        .initial-input input {
-            flex-grow: 1;
-            padding: 14px 18px;
-            border: 1px solid rgba(255, 255, 255, 0.3); /* Semi-transparent white border */
-            border-radius: 10px;
-            font-size: 1.1em;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            background-color: rgba(255, 255, 255, 0.1); /* Transparent white background */
-            color: white; /* White text for input */
-        }
+    .initial-input button,
+    .chat-input button {
+      padding: 14px 25px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+    }
 
-        .initial-input input::placeholder { /* Placeholder text color */
-            color: rgba(255, 255, 255, 0.6);
-        }
+    .chat-box {
+      flex-grow: 1;
+      padding: 20px 25px;
+      overflow-y: auto;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      box-sizing: border-box;
+      background-color: rgba(0, 0, 0, 0.1);
+      opacity: 0;
+    }
 
-        .initial-input input:focus {
-            outline: none;
-            border-color: rgba(255, 255, 255, 0.6); /* Lighter white focus border */
-            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2); /* White focus shadow */
-        }
+    .chat-input {
+      display: none;
+      padding: 18px 50px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background-color: rgba(0, 0, 0, 0.15);
+      width: 100%;
+      box-sizing: border-box;
+      opacity: 0;
+    }
 
-        .initial-input button {
-            padding: 14px 25px;
-            background: rgba(255, 255, 255, 0.15); /* Transparent white button */
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 1.1em;
-            font-weight: 600;
-            transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
+    .message {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
 
-        .initial-input button:hover {
-            background: rgba(255, 255, 255, 0.25); /* Slightly more opaque on hover */
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        }
+    .user-message {
+      flex-direction: row-reverse;
+    }
 
-        .initial-input button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
+    .message-text {
+      background-color: rgba(255, 255, 255, 0.2);
+      padding: 14px 20px;
+      border-radius: 18px;
+      max-width: 85%;
+      color: white;
+      line-height: 1.5;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
 
-        .model-loading-status {
-            margin-top: 25px;
-            color: rgba(255, 255, 255, 0.7); /* Lighter gray for status */
-            font-size: 1em;
-            font-weight: 500;
-        }
+    .ollama-message .message-text {
+      background-color: rgba(0, 0, 0, 0.3);
+    }
 
-        /* Chat Box and Standard Input (initially hidden) */
-        .chat-box {
-            flex-grow: 1;
-            padding: 20px 25px;
-            overflow-y: auto;
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-            background-color: rgba(0, 0, 0, 0.1); /* Transparent dark background for chat box */
-            width: 100%;
-            box-sizing: border-box;
-            opacity: 0;
-            transition: opacity 0.6s ease;
-        }
+    .avatar {
+      width: 36px;
+      height: 36px;
+      background-color: rgba(255, 255, 255, 0.3);
+      color: white;
+      font-weight: bold;
+      font-size: 1em;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
 
-        /* Custom Scrollbar for Webkit browsers */
-        .chat-box::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .chat-box::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05); /* Very subtle track */
-            border-radius: 10px;
-        }
-
-        .chat-box::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3); /* Transparent white thumb */
-            border-radius: 10px;
-        }
-
-        .chat-box::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-
-        .chat-input {
-            display: none;
-            padding: 18px 50px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1); /* Subtle white border */
-            background-color: rgba(0, 0, 0, 0.15); /* Transparent dark background for input area */
-            border-bottom-left-radius: 16px;
-            border-bottom-right-radius: 16px;
-            width: 100%;
-            box-sizing: border-box;
-            opacity: 0;
-            transition: opacity 0.6s ease;
-        }
-
-        .chat-input input {
-            flex-grow: 1;
-            padding: 14px 18px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            margin-right: 12px;
-            font-size: 1.1em;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-
-        .chat-input input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .chat-input input:focus {
-            outline: none;
-            border-color: rgba(255, 255, 255, 0.6);
-            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
-        }
-
-        .chat-input button {
-            padding: 14px 25px;
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 1.1em;
-            font-weight: 600;
-            transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .chat-input button:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .chat-input button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Message bubbles */
-        .message {
-            padding: 14px 20px;
-            border-radius: 18px;
-            max-width: 85%;
-            word-wrap: break-word;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* Darker shadow for contrast */
-            font-size: 1em;
-            line-height: 1.5;
-            color: white; /* Ensure message text is white */
-        }
-
-        .user-message {
-            background-color: rgba(255, 255, 255, 0.2); /* Transparent white for user */
-            align-self: flex-end;
-            margin-left: auto;
-            border-bottom-right-radius: 6px;
-        }
-
-        .ollama-message {
-            background-color: rgba(0, 0, 0, 0.3); /* Transparent black for Ollama */
-            align-self: flex-start;
-            margin-right: auto;
-            border-bottom-left-radius: 6px;
-        }
-
-        /* Active Chat Layout */
-        /* Removed .chat-container.chat-active styles as header is now fixed globally */
-
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            body {
-                padding: 0;
-            }
-            .chat-container {
-                border-radius: 0;
-                max-height: 100vh;
-                width: 100%;
-                min-height: 100vh;
-                margin-top: 110px; /* Adjust for smaller header height on mobile */
-            }
-            .header {
-                flex-direction: column;
-                gap: 10px;
-                padding: 15px;
-                border-radius: 0;
-                top: 0; /* Align to top of viewport on mobile */
-                width: 100%; /* Full width on mobile */
-                transform: none; /* No horizontal transform needed */
-            }
-            .header h1 {
-                font-size: 1.5em;
-            }
-            .model-selection select {
-                width: 100%;
-            }
-            .initial-prompt-container h2 {
-                font-size: 2em;
-            }
-            .initial-input {
-                width: 90%;
-                flex-direction: column;
-                gap: 8px;
-            }
-            .initial-input input, .initial-input button {
-                width: 100%;
-                margin-right: 0;
-            }
-            .chat-input {
-                flex-direction: column;
-                gap: 10px;
-                padding: 15px;
-                border-radius: 0;
-            }
-            .chat-input input {
-                margin-right: 0;
-            }
-            .chat-input button {
-                width: 100%;
-            }
-
-            .message {
-                font-size: 0.9em;
-                padding: 12px 16px;
-            }
-        }
-    </style>
-    <!-- Inline CSS ends here -->
+    .user-message .avatar {
+      background-color: rgba(255, 255, 255, 0.25);
+    }
+  </style>
 </head>
 <body>
-    <!-- Header is now a direct child of body and fixed -->
-    <div class="header">
-        <h1>TextGen-AI</h1>
-        <div class="model-selection">
-            <label for="modelSelect">Select Model:</label>
-            <select id="modelSelect">
-                <!-- Models will be loaded here dynamically via JavaScript -->
-                <option value="loading" disabled selected>Loading models...</option>
-            </select>
-        </div>
+  <div class="header">
+    <h1 href = "./Welcome Page/Welcome.html">TextGen-AI</h1>
+    <div class="model-selection">
+      <label for="modelSelect">Select Model:</label>
+      <select id="modelSelect">
+        <option value="loading" disabled selected>Loading models...</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="chat-container" id="chatContainer">
+    <div class="initial-prompt-container" id="initialPromptContainer">
+      <h2 id="greetingMessage"></h2>
+      <div class="initial-input">
+        <input type="text" id="initialMessageInput" placeholder="Start chatting...">
+        <button id="initialSendButton">Send</button>
+      </div>
+      <p class="model-loading-status" id="modelLoadingStatus">Loading Ollama models...</p>
     </div>
 
-    <div class="chat-container" id="chatContainer">
-        <!-- Initial Prompt and Input Area -->
-        <div class="initial-prompt-container" id="initialPromptContainer">
-            <h2 id="greetingMessage"></h2>
-            <div class="initial-input">
-                <input type="text" id="initialMessageInput" placeholder="Start chatting...">
-                <button id="initialSendButton">Send</button>
-            </div>
-            <p class="model-loading-status" id="modelLoadingStatus">Loading Ollama models...</p>
-        </div>
+    <div class="chat-box" id="chatBox"></div>
 
-        <!-- Chat Box (initially hidden, appears after first message) -->
-        <div class="chat-box" id="chatBox">
-            <!-- Chat messages will appear here -->
-        </div>
-
-        <!-- Standard Chat Input (appears after first message) -->
-        <div class="chat-input" id="standardChatInput">
-            <input type="text" id="messageInput" placeholder="Type your message...">
-            <button id="sendButton">Send</button>
-        </div>
+    <div class="chat-input" id="standardChatInput">
+      <input type="text" id="messageInput" placeholder="Type your message...">
+      <button id="sendButton">Send</button>
     </div>
+  </div>
 
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
