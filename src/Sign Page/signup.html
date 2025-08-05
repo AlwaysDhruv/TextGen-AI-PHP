@@ -143,14 +143,11 @@
       margin-top: -0.5rem;
       margin-bottom: 1rem;
     }
-    
-    =======
   </style>
 </head>
 <body>
 
   <div class="bg-animation">
-    <!-- Create 256 spans for 16x16 grid -->
     <script>
       for (let i = 0; i < 256; i++) {
         document.write("<span>*</span>");
@@ -169,9 +166,9 @@
         <div id="emailError" class="error"></div>
         
         <div style="position: relative;">
-          <input class="input-field" type="password" id="password" name="password" place
-        </div>holder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_=+-]).{8,}" title="Make a strong password" required style="padding-right: 10px;">
+          <input class="input-field" type="password" id="password" name="password" placeholder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_=+-]).{8,}" title="Make a strong password" required style="padding-right: 10px;">
           <i id="togglePassword" class="far fa-eye" style="position: absolute; right: 5px; top: 40%; transform: translateY(-50%); cursor: pointer; color: #94a3b8; font-size: 1rem;"></i>
+        </div><br>
         <div id="passwordError" class="error" style="margin-top: -0.8rem;"></div>
         
         <button type="submit">Sign Up</button>
