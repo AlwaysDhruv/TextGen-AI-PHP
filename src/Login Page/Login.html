@@ -74,6 +74,43 @@
       border-color: #6366f1;
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
     }
+
+    .password-container {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #ffffff;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 6px;
+      padding: 6px;
+      transition: all 0.3s;
+      z-index: 10;
+      backdrop-filter: blur(5px);
+    }
+
+    .password-toggle:hover {
+      color: #ffffff;
+      background: rgba(99, 102, 241, 0.4);
+      border-color: rgba(99, 102, 241, 0.5);
+      transform: translateY(-50%) scale(1.05);
+    }
+
+    .password-toggle:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    .password-toggle svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center">
@@ -93,7 +130,18 @@
     <input type="email" name="email" id="email" required class="input-field w-full p-3 rounded-lg mb-4" />
 
     <label for="password" class="block text-gray-400 mb-2">Password</label>
-    <input type="password" name="password" id="password" required class="input-field w-full p-3 rounded-lg mb-4" />
+    <div class="password-container mb-4">
+      <input type="password" name="password" id="password" required class="input-field w-full p-3 pr-12 rounded-lg" />
+      <span class="password-toggle" onclick="togglePassword()">
+        <svg id="eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+        <svg id="eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+        </svg>
+      </span>
+    </div>
 
     <div class="flex justify-between items-center mb-6 text-sm text-gray-400">
       <a href="../Forgot Page/forgot.html" class="text-indigo-400 hover:text-indigo-300">Forgot password?</a>
@@ -105,6 +153,24 @@
       <a href="../Sign Page/signup.html" class="text-indigo-400 hover:text-indigo-300">Sign up</a>
     </p>
   </form>
+
+  <script>
+    function togglePassword() {
+      const passwordInput = document.getElementById('password');
+      const eyeOpen = document.getElementById('eye-open');
+      const eyeClosed = document.getElementById('eye-closed');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeOpen.style.display = 'none';
+        eyeClosed.style.display = 'block';
+      } else {
+        passwordInput.type = 'password';
+        eyeOpen.style.display = 'block';
+        eyeClosed.style.display = 'none';
+      }
+    }
+  </script>
 
 </body>
 </html>

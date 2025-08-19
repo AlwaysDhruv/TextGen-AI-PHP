@@ -47,6 +47,16 @@ try {
                      "Message:\n$message";
 
     $mail->send();
+    
+    $mail->addAddress('huzaifaravat7@gmail.com', 'TextGen-AI Admin'); // Receiver's email
+    // Content
+    $mail->Subject = 'New Contact Message from TextGen-AI';
+    $mail->Body    = "You received a message from TextGen-AI:\n\n" .
+                     "Name: $name\n" .
+                     "Email: $email\n\n" .
+                     "Message:\n$message";
+
+    $mail->send();
 
     echo json_encode(['success' => true, 'message' => 'Message sent successfully!']);
 } catch (Exception $e) {

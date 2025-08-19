@@ -7,9 +7,9 @@ const devs = [
   },
   {
     name: "Huzefa S. Rawat",
-    github: "https://github.com/huzu173",
+    github: "https://github.com/CYberHuzu18",
     linkedin: "https://www.linkedin.com/in/huzaifa-ravat-556728293/",
-    img: "https://avatars.githubusercontent.com/huzu173"
+    img: "https://avatars.githubusercontent.com/u/198754421?v=4"
   }
 ];
 
