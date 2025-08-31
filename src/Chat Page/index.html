@@ -146,6 +146,24 @@
             transform: translateY(-1px);
         }
 
+        .coding-button {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .coding-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+
         .api-key-container {
             display: flex;
             align-items: center;
@@ -358,22 +376,22 @@
         }
 
         .message-content code {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-family: 'JetBrains Mono', 'Fira Code', monospace;
-            font-size: 13px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: transparent;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: inherit;
+            border: none;
             color: inherit;
         }
 
         .message-content pre {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 16px;
-            border-radius: 8px;
-            margin: 12px 0;
-            overflow-x: auto;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            margin: 8px 0;
+            overflow: visible;
+            border: none;
             position: relative;
         }
 
@@ -382,27 +400,12 @@
             padding: 0;
             border: none;
             color: inherit;
-            font-size: 13px;
+            font-size: inherit;
+            font-family: inherit;
         }
 
         .code-viewer-button {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(0, 0, 0, 0.7);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .code-viewer-button:hover {
-            background: rgba(0, 0, 0, 0.9);
-            transform: translateY(-1px);
+            display: none;
         }
 
         /* Code Viewer Modal */
@@ -949,11 +952,17 @@
             TextGen-AI Chat
         </div>
         <div class="header-controls">
-            <button class="control-button tooltip" data-tooltip="Clear Chat" onclick="window.geminiChat?.clearChat()">
-                🗑️ Clear
+            <button class="coding-button tooltip" data-tooltip="Open Coding Window" onclick="window.geminiChat?.openCodingWindow()">
+                💻 Coding
             </button>
+            <button class="control-button tooltip" data-tooltip="Import Chat" onclick="window.geminiChat?.importChat()">
+                📤 Import
+            </button>            
             <button class="control-button tooltip" data-tooltip="Export Chat" onclick="window.geminiChat?.exportChat()">
                 📥 Export
+            </button>
+            <button class="control-button tooltip" data-tooltip="Clear Chat" onclick="window.geminiChat?.clearChat()">
+                🗑️ Clear
             </button>
         </div>
         <div class="api-key-container">
@@ -1335,25 +1344,29 @@
                 return button;
             }
 
+            importChat() {
+                const fileInput = document.getElementById('fileInput');
+                fileInput.onchange = (e) => this.handleFileImport(e);
+                fileInput.click();
+            }
+            
             formatMessageContent(content) {
                 let htmlContent = content
                     // Bold text
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                     // Italic text
                     .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                    // Inline code (no highlighting)
-                    .replace(/`([^`]+)`/g, '<code>$1</code>')
-                    // Code blocks with viewer button
+                    // Inline code (no special formatting)
+                    .replace(/`([^`]+)`/g, '$1')
+                    // Code blocks (remove backticks, no special formatting)
                     .replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-                        const codeId = 'code_' + Math.random().toString(36).substr(2, 9);
                         const cleanCode = code.trim();
-                        const language = lang || 'text';
                         
-                        // Store code for viewer
-                        if (!this.codeBlocks) this.codeBlocks = new Map();
-                        this.codeBlocks.set(codeId, { code: cleanCode, language: language });
+                        // Store code for coding window
+                        if (!this.allCodeBlocks) this.allCodeBlocks = [];
+                        this.allCodeBlocks.push({ code: cleanCode, language: lang || 'text' });
                         
-                        return `<pre data-code-id="${codeId}"><code>${cleanCode}</code><button class="code-viewer-button" onclick="window.geminiChat.openCodeViewer('${codeId}')">👁️ View Code</button></pre>`;
+                        return cleanCode;
                     })
                     // Links
                     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="api-link">$1</a>');
@@ -1364,20 +1377,32 @@
                 return htmlContent;
             }
 
-            // Code Viewer Methods
-            openCodeViewer(codeId) {
-                if (!this.codeBlocks || !this.codeBlocks.has(codeId)) return;
+            // Coding Window Methods
+            openCodingWindow() {
+                if (!this.allCodeBlocks || this.allCodeBlocks.length === 0) {
+                    this.showError('❌ No code found in the conversation yet!');
+                    return;
+                }
                 
-                const codeData = this.codeBlocks.get(codeId);
                 const modal = document.getElementById('codeViewerModal');
                 const title = document.getElementById('codeViewerTitle');
                 const content = document.getElementById('codeViewerContent');
                 
-                title.textContent = `Code Viewer - ${codeData.language.toUpperCase()}`;
-                content.textContent = codeData.code;
+                // Combine all code blocks
+                let allCode = '';
+                this.allCodeBlocks.forEach((block, index) => {
+                    if (index > 0) allCode += '\n\n' + '='.repeat(50) + '\n\n';
+                    if (block.language && block.language !== 'text') {
+                        allCode += `// ${block.language.toUpperCase()}\n`;
+                    }
+                    allCode += block.code;
+                });
                 
-                this.currentCodeContent = codeData.code;
-                this.currentCodeLanguage = codeData.language;
+                title.textContent = `Coding Window - All Code from Conversation`;
+                content.textContent = allCode;
+                
+                this.currentCodeContent = allCode;
+                this.currentCodeLanguage = 'mixed';
                 
                 modal.classList.add('show');
                 document.body.style.overflow = 'hidden';
@@ -1711,6 +1736,14 @@
                     setTimeout(() => {
                         e.target.style.transform = '';
                     }, 150);
+                }
+            });
+
+            // Close code viewer when clicking outside
+            document.addEventListener('click', (e) => {
+                const modal = document.getElementById('codeViewerModal');
+                if (e.target === modal) {
+                    window.geminiChat?.closeCodeViewer();
                 }
             });
         });
