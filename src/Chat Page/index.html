@@ -358,30 +358,162 @@
         }
 
         .message-content code {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.1);
             padding: 4px 8px;
             border-radius: 6px;
             font-family: 'JetBrains Mono', 'Fira Code', monospace;
             font-size: 13px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #00ff88;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: inherit;
         }
 
         .message-content pre {
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(255, 255, 255, 0.05);
             padding: 16px;
             border-radius: 8px;
             margin: 12px 0;
             overflow-x: auto;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
         }
 
         .message-content pre code {
             background: none;
             padding: 0;
             border: none;
-            color: #00ff88;
+            color: inherit;
             font-size: 13px;
+        }
+
+        .code-viewer-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .code-viewer-button:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translateY(-1px);
+        }
+
+        /* Code Viewer Modal */
+        .code-viewer-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        .code-viewer-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .code-viewer-window {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 1000px;
+            height: 80%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        .code-viewer-header {
+            background: #0f0f0f;
+            padding: 16px 20px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-viewer-title {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .code-viewer-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-action-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .code-action-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .code-viewer-content {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .code-viewer-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .code-viewer-content::-webkit-scrollbar-track {
+            background: #0f0f0f;
+        }
+
+        .code-viewer-content::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
 
         .message-time {
@@ -879,6 +1011,21 @@
         </div>
     </div>
 
+    <!-- Code Viewer Modal -->
+    <div class="code-viewer-modal" id="codeViewerModal">
+        <div class="code-viewer-window">
+            <div class="code-viewer-header">
+                <div class="code-viewer-title" id="codeViewerTitle">Code Viewer</div>
+                <div class="code-viewer-actions">
+                    <button class="code-action-button" onclick="window.geminiChat.copyCodeContent()">📋 Copy</button>
+                    <button class="code-action-button" onclick="window.geminiChat.downloadCode()">💾 Download</button>
+                    <button class="code-action-button" onclick="window.geminiChat.closeCodeViewer()">✕ Close</button>
+                </div>
+            </div>
+            <div class="code-viewer-content" id="codeViewerContent"></div>
+        </div>
+    </div>
+
     <script>
         class EnhancedGeminiChat {
             constructor() {
@@ -1194,10 +1341,20 @@
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                     // Italic text
                     .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                    // Inline code
+                    // Inline code (no highlighting)
                     .replace(/`([^`]+)`/g, '<code>$1</code>')
-                    // Code blocks
-                    .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+                    // Code blocks with viewer button
+                    .replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+                        const codeId = 'code_' + Math.random().toString(36).substr(2, 9);
+                        const cleanCode = code.trim();
+                        const language = lang || 'text';
+                        
+                        // Store code for viewer
+                        if (!this.codeBlocks) this.codeBlocks = new Map();
+                        this.codeBlocks.set(codeId, { code: cleanCode, language: language });
+                        
+                        return `<pre data-code-id="${codeId}"><code>${cleanCode}</code><button class="code-viewer-button" onclick="window.geminiChat.openCodeViewer('${codeId}')">👁️ View Code</button></pre>`;
+                    })
                     // Links
                     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="api-link">$1</a>');
                 
@@ -1205,6 +1362,94 @@
                 htmlContent = htmlContent.replace(/\n/g, '<br>');
                 
                 return htmlContent;
+            }
+
+            // Code Viewer Methods
+            openCodeViewer(codeId) {
+                if (!this.codeBlocks || !this.codeBlocks.has(codeId)) return;
+                
+                const codeData = this.codeBlocks.get(codeId);
+                const modal = document.getElementById('codeViewerModal');
+                const title = document.getElementById('codeViewerTitle');
+                const content = document.getElementById('codeViewerContent');
+                
+                title.textContent = `Code Viewer - ${codeData.language.toUpperCase()}`;
+                content.textContent = codeData.code;
+                
+                this.currentCodeContent = codeData.code;
+                this.currentCodeLanguage = codeData.language;
+                
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+
+            closeCodeViewer() {
+                const modal = document.getElementById('codeViewerModal');
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+
+            async copyCodeContent() {
+                if (!this.currentCodeContent) return;
+                
+                try {
+                    await navigator.clipboard.writeText(this.currentCodeContent);
+                    this.showSuccess('📋 Code copied to clipboard!');
+                } catch (err) {
+                    console.error('Failed to copy code:', err);
+                    // Fallback
+                    const textArea = document.createElement('textarea');
+                    textArea.value = this.currentCodeContent;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        this.showSuccess('📋 Code copied to clipboard!');
+                    } catch (fallbackErr) {
+                        this.showError('❌ Failed to copy code');
+                    }
+                    document.body.removeChild(textArea);
+                }
+            }
+
+            downloadCode() {
+                if (!this.currentCodeContent) return;
+                
+                const extension = this.getFileExtension(this.currentCodeLanguage);
+                const blob = new Blob([this.currentCodeContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `code_snippet_${new Date().toISOString().split('T')[0]}.${extension}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.showSuccess('💾 Code downloaded successfully!');
+            }
+
+            getFileExtension(language) {
+                const extensions = {
+                    'javascript': 'js',
+                    'python': 'py',
+                    'html': 'html',
+                    'css': 'css',
+                    'java': 'java',
+                    'cpp': 'cpp',
+                    'c': 'c',
+                    'php': 'php',
+                    'sql': 'sql',
+                    'json': 'json',
+                    'xml': 'xml',
+                    'yaml': 'yml',
+                    'markdown': 'md',
+                    'typescript': 'ts',
+                    'jsx': 'jsx',
+                    'tsx': 'tsx'
+                };
+                return extensions[language.toLowerCase()] || 'txt';
             }
             
             setGeneratingState(isGenerating) {
@@ -1371,10 +1616,14 @@
                 }
             }
             
-            // Escape to stop generation
+            // Escape to stop generation or close code viewer
             if (e.key === 'Escape') {
                 const stopButton = document.getElementById('stopButton');
-                if (stopButton.style.display === 'flex') {
+                const modal = document.getElementById('codeViewerModal');
+                
+                if (modal.classList.contains('show')) {
+                    window.geminiChat?.closeCodeViewer();
+                } else if (stopButton.style.display === 'flex') {
                     stopButton.click();
                 }
             }
