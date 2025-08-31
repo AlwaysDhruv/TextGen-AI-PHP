@@ -146,24 +146,6 @@
             transform: translateY(-1px);
         }
 
-        .coding-button {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-        }
-
-        .coding-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
-        }
-
         .api-key-container {
             display: flex;
             align-items: center;
@@ -371,42 +353,83 @@
         }
 
         .message-content em {
-            color: var(--text-secondary);
             font-style: italic;
+        }
+        
+        .message-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .user .message-content pre {
+            background: #f0f0f0;
+            border-color: #ddd;
         }
 
         .message-content code {
-            background: transparent;
-            padding: 2px 4px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2px 5px;
             border-radius: 4px;
-            font-family: inherit;
-            font-size: inherit;
-            border: none;
-            color: inherit;
+            font-size: 0.9em;
         }
-
-        .message-content pre {
-            background: transparent;
-            padding: 0;
-            border-radius: 0;
-            margin: 8px 0;
-            overflow: visible;
-            border: none;
-            position: relative;
+        
+        .user .message-content code {
+            background: #e0e0e0;
         }
 
         .message-content pre code {
             background: none;
             padding: 0;
-            border: none;
-            color: inherit;
+            border-radius: 0;
             font-size: inherit;
-            font-family: inherit;
         }
 
-        .code-viewer-button {
-            display: none;
+        /* ADDED: Styles for the new code block wrapper and button */
+        .code-block-wrapper {
+            position: relative;
+            margin: 12px 0;
         }
+
+        .view-code-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-secondary);
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            opacity: 0.5;
+            z-index: 1;
+        }
+
+        .code-block-wrapper:hover .view-code-button {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+        }
+
+        .view-code-button:hover {
+            transform: scale(1.05);
+        }
+
+        .code-block-wrapper pre {
+            margin: 0; /* Reset margin since wrapper has it now */
+        }
+        /* End of added styles */
 
         /* Code Viewer Modal */
         .code-viewer-modal {
@@ -952,10 +975,7 @@
             TextGen-AI Chat
         </div>
         <div class="header-controls">
-            <button class="coding-button tooltip" data-tooltip="Open Coding Window" onclick="window.geminiChat?.openCodingWindow()">
-                💻 Coding
-            </button>
-            <button class="control-button tooltip" data-tooltip="Import Chat" onclick="window.geminiChat?.importChat()">
+             <button class="control-button tooltip" data-tooltip="Import Chat" onclick="window.geminiChat?.importChat()">
                 📤 Import
             </button>            
             <button class="control-button tooltip" data-tooltip="Export Chat" onclick="window.geminiChat?.exportChat()">
@@ -986,7 +1006,7 @@
                 <div class="welcome-features">
                     <div class="feature-card">
                         <div class="feature-title">💡 Smart Conversations</div>
-                        <div class="feature-description">Powered by Gemini 2.5 Flash for fast, intelligent responses</div>
+                        <div class="feature-description">Powered by Gemini for fast, intelligent responses</div>
                     </div>
                     <div class="feature-card">
                         <div class="feature-title">🎨 Beautiful Interface</div>
@@ -1020,7 +1040,6 @@
         </div>
     </div>
 
-    <!-- Code Viewer Modal -->
     <div class="code-viewer-modal" id="codeViewerModal">
         <div class="code-viewer-window">
             <div class="code-viewer-header">
@@ -1035,10 +1054,13 @@
         </div>
     </div>
 
+    <input type="file" id="fileInput" style="display: none;" accept=".json">
+
     <script>
         class EnhancedGeminiChat {
             constructor() {
                 this.history = [];
+                this.allCodeBlocks = []; 
                 this.isGenerating = false;
                 this.abortController = null;
                 this.isStopped = false;
@@ -1074,7 +1096,6 @@
                 this.chatInput.addEventListener('input', () => this.autoResizeTextarea());
                 this.apiKeyInput.addEventListener('input', () => this.handleApiKeyInput());
                 
-                // Load saved API key (using variables instead of localStorage for Claude.ai compatibility)
                 this.savedApiKey = '';
                 if (this.savedApiKey) {
                     this.apiKeyInput.value = this.savedApiKey;
@@ -1084,6 +1105,7 @@
 
             createBackgroundParticles() {
                 const particlesContainer = document.getElementById('backgroundParticles');
+                if (!particlesContainer) return;
                 const particleCount = 50;
                 
                 for (let i = 0; i < particleCount; i++) {
@@ -1099,36 +1121,20 @@
             setupInitialGreeting() {
                 const hour = new Date().getHours();
                 let greeting;
-                if (hour < 12) {
-                    greeting = "Good morning! ☀️";
-                } else if (hour < 18) {
-                    greeting = "Good afternoon! 🌤️";
-                } else {
-                    greeting = "Good evening! 🌙";
-                }
+                if (hour < 12) greeting = "Good morning! ☀️";
+                else if (hour < 18) greeting = "Good afternoon! 🌤️";
+                else greeting = "Good evening! 🌙";
                 
-                // Update welcome title with dynamic greeting
                 const welcomeTitle = document.querySelector('.welcome-title');
-                if (welcomeTitle) {
-                    welcomeTitle.textContent = `${greeting} Ready to chat?`;
-                }
+                if (welcomeTitle) welcomeTitle.textContent = `${greeting} Ready to chat?`;
             }
             
             handleApiKeyInput() {
                 const hasApiKey = this.apiKeyInput.value.trim().length > 0;
-                const apiKey = this.apiKeyInput.value.trim();
-                
-                // Save API key to variable (localStorage not available in Claude.ai)
-                if (hasApiKey) {
-                    this.savedApiKey = apiKey;
-                } else {
-                    this.savedApiKey = '';
-                }
-                
+                this.savedApiKey = hasApiKey ? this.apiKeyInput.value.trim() : '';
                 this.chatInput.disabled = !hasApiKey;
                 this.sendButton.disabled = !hasApiKey || !this.chatInput.value.trim();
                 
-                // Update API status indicator
                 if (hasApiKey) {
                     this.apiStatus.classList.add('connected');
                     this.apiStatus.title = 'API Key Connected';
@@ -1147,13 +1153,8 @@
                 const apiKey = this.apiKeyInput.value.trim();
                 this.isStopped = false;
 
-                if (!prompt || this.isGenerating) return;
-                if (!apiKey) {
-                    this.showError("🔑 API key is required. Get one from Google AI Studio.");
-                    return;
-                }
+                if (!prompt || this.isGenerating || !apiKey) return;
 
-                // Remove welcome message on first interaction
                 if (this.welcomeContainer) {
                     this.welcomeContainer.style.animation = 'messageSlideOut 0.4s ease-in forwards';
                     setTimeout(() => {
@@ -1167,7 +1168,6 @@
                 this.autoResizeTextarea();
                 this.setGeneratingState(true);
 
-                // Create AI message with thinking animation
                 const aiMessageContainer = this.createMessageElement('ai', '');
                 const thinkingAnimation = this.createThinkingAnimation();
                 aiMessageContainer.querySelector('.message-content').appendChild(thinkingAnimation);
@@ -1178,69 +1178,74 @@
 
                 try {
                     this.abortController = new AbortController();
-                    const signal = this.abortController.signal;
-                    const model = 'gemini-2.5-flash-preview-05-20';
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-                    
+                    const model = 'gemini-1.5-flash-latest';
+                    const apiUrl = `https://generativelenuguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?key=${apiKey}&alt=sse`;
+
                     this.history.push({ role: "user", parts: [{ text: prompt }] });
                     
-                    const payload = {
-                        contents: this.history,
-                        safetySettings: [
-                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-                        ],
-                        generationConfig: {
-                            temperature: 0.7,
-                            maxOutputTokens: 4096,
-                        }
-                    };
+                    const payload = { contents: this.history };
 
                     const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload),
-                        signal: signal
+                        signal: this.abortController.signal
                     });
 
                     if (!response.ok) {
                         const errorData = await response.json();
                         throw new Error(errorData.error.message || `HTTP error! status: ${response.status}`);
                     }
-
-                    const data = await response.json();
+                    
                     thinkingAnimation.remove();
+                    
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let fullResponse = "";
+                    let buffer = "";
 
-                    if (data.candidates && data.candidates.length > 0) {
-                        const aiResponse = data.candidates[0].content.parts[0].text;
-                        if (!this.isStopped) {
-                            await this.streamResponse(contentDiv, aiResponse);
-                            this.history.push({ role: "model", parts: [{ text: aiResponse }] });
+                    while(true) {
+                        if (this.isStopped) break;
+                        const { value, done } = await reader.read();
+                        if (done) break;
+
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop();
+
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                try {
+                                    const json = JSON.parse(line.substring(6));
+                                    const textChunk = json.candidates[0]?.content?.parts[0]?.text || '';
+                                    if (textChunk) {
+                                        fullResponse += textChunk;
+                                        contentDiv.innerHTML = this.formatMessageContent(fullResponse);
+                                        this.scrollToBottom();
+                                    }
+                                } catch (e) { /* Ignore malformed JSON */ }
+                            }
                         }
-                    } else {
-                        const blockedMessage = "⚠️ The response was blocked due to safety settings. Please try rephrasing your question.";
-                        await this.streamResponse(contentDiv, blockedMessage);
-                        this.history.push({ role: "model", parts: [{ text: blockedMessage }] });
                     }
+
+                    if (!this.isStopped) {
+                        this.history.push({ role: "model", parts: [{ text: fullResponse }] });
+                    }
+
                 } catch (error) {
                     thinkingAnimation.remove();
-                    if (error.name === 'AbortError') {
-                        await this.streamResponse(contentDiv, '🛑 Generation stopped.');
-                    } else {
-                        console.error('Error:', error);
-                        let errorMsg = '❌ Sorry, I encountered an error.';
-                        if (error.message.includes('API_KEY_INVALID')) {
-                            errorMsg = '🔑 Invalid API key. Please check your API key.';
-                            this.apiStatus.classList.remove('connected');
-                        } else if (error.message.includes('QUOTA_EXCEEDED')) {
-                            errorMsg = '📊 API quota exceeded. Please check your usage.';
-                        }
-                        this.showError(errorMsg);
-                        await this.streamResponse(contentDiv, errorMsg);
-                    }
+                    let errorMsg = '❌ Sorry, an error occurred.';
+                    if (error.name === 'AbortError') errorMsg = '🛑 Generation stopped.';
+                    else if (error.message.includes('API_KEY_INVALID')) errorMsg = '🔑 Invalid API key.';
+                    
+                    contentDiv.innerHTML = this.formatMessageContent(errorMsg);
                 } finally {
+                     const messageDiv = contentDiv.closest('.message');
+                    if (messageDiv && !messageDiv.querySelector('.copy-button')) {
+                        const finalContent = contentDiv.innerText;
+                        const copyButton = this.createCopyButton(finalContent);
+                        messageDiv.appendChild(copyButton);
+                    }
                     this.setGeneratingState(false);
                 }
             }
@@ -1272,15 +1277,10 @@
                 contentDiv.className = 'message-content';
                 contentDiv.innerHTML = this.formatMessageContent(content);
                 
-                const time = document.createElement('div');
-                time.className = 'message-time';
-                time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                
-                contentDiv.appendChild(time);
                 messageDiv.appendChild(avatar);
                 messageDiv.appendChild(contentDiv);
                 
-                if (sender === 'ai' && content) {
+                if (content && !content.includes('```')) { // Don't add general copy button to code messages
                     const copyButton = this.createCopyButton(content);
                     messageDiv.appendChild(copyButton);
                 }
@@ -1299,115 +1299,76 @@
                 return animationDiv;
             }
 
-            async streamResponse(element, text) {
-                element.innerHTML = '';
-                let displayText = '';
-                
-                // Simulate streaming effect with improved timing
-                for (let i = 0; i < text.length; i++) {
-                    if (this.isStopped) break;
-                    
-                    displayText += text[i];
-                    element.innerHTML = this.formatMessageContent(displayText);
-                    this.scrollToBottom();
-                    
-                    // Variable delay for more natural feel
-                    const delay = text[i] === ' ' ? 25 : (text[i] === '\n' ? 40 : 12);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                }
-                
-                // Ensure final formatting
-                if (!this.isStopped) {
-                    element.innerHTML = this.formatMessageContent(text);
-                    
-                    // Add copy button after streaming completes
-                    const messageDiv = element.closest('.message');
-                    if (messageDiv && !messageDiv.querySelector('.copy-button')) {
-                        const copyButton = this.createCopyButton(text);
-                        messageDiv.appendChild(copyButton);
-                    }
-                }
-                
-                this.scrollToBottom();
-            }
-
             createCopyButton(text) {
                 const button = document.createElement('button');
                 button.className = 'copy-button tooltip';
-                button.setAttribute('data-tooltip', 'Copy to clipboard');
-                button.innerHTML = `
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-                    </svg>
-                `;
-                button.addEventListener('click', () => this.copyToClipboard(text, button));
+                button.setAttribute('data-tooltip', 'Copy');
+                button.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.copyToClipboard(text, button);
+                });
                 return button;
             }
-
-            importChat() {
-                const fileInput = document.getElementById('fileInput');
-                fileInput.onchange = (e) => this.handleFileImport(e);
-                fileInput.click();
-            }
             
+            /* MODIFIED: Updated to add a wrapper and button for each code block */
             formatMessageContent(content) {
-                let htmlContent = content
-                    // Bold text
+                let htmlContent = this.escapeHtml(content)
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    // Italic text
-                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                    // Inline code (no special formatting)
-                    .replace(/`([^`]+)`/g, '$1')
-                    // Code blocks (remove backticks, no special formatting)
-                    .replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-                        const cleanCode = code.trim();
-                        
-                        // Store code for coding window
-                        if (!this.allCodeBlocks) this.allCodeBlocks = [];
-                        this.allCodeBlocks.push({ code: cleanCode, language: lang || 'text' });
-                        
-                        return cleanCode;
-                    })
-                    // Links
-                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="api-link">$1</a>');
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>');
                 
-                // Convert line breaks
-                htmlContent = htmlContent.replace(/\n/g, '<br>');
-                
+                htmlContent = htmlContent.replace(/```(\w*?)\n([\s\S]+?)```/g, (match, lang, code) => {
+                    const unescapedCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+                    const blockIndex = this.allCodeBlocks.length;
+                    
+                    this.allCodeBlocks.push({ code: unescapedCode.trim(), language: lang || 'text' });
+
+                    return `
+                        <div class="code-block-wrapper">
+                            <button class="view-code-button" onclick="window.geminiChat.openCodeViewerForBlock(${blockIndex})">
+                                View Code
+                            </button>
+                            <pre><code>${this.escapeHtml(unescapedCode.trim())}</code></pre>
+                        </div>
+                    `;
+                })
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                .replace(/\n/g, '<br>');
+
                 return htmlContent;
             }
+            
+            escapeHtml(str) {
+                return str
+                    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            }
 
-            // Coding Window Methods
-            openCodingWindow() {
-                if (!this.allCodeBlocks || this.allCodeBlocks.length === 0) {
-                    this.showError('❌ No code found in the conversation yet!');
+            /* ADDED: New function to open the modal for a specific code block */
+            openCodeViewerForBlock(index) {
+                const block = this.allCodeBlocks[index];
+                if (!block) {
+                    console.error("Code block not found for index:", index);
                     return;
                 }
                 
                 const modal = document.getElementById('codeViewerModal');
                 const title = document.getElementById('codeViewerTitle');
                 const content = document.getElementById('codeViewerContent');
+
+                const languageName = block.language.charAt(0).toUpperCase() + block.language.slice(1);
+                title.textContent = `Code Viewer - ${languageName || 'Snippet'}`;
+                content.textContent = block.code;
                 
-                // Combine all code blocks
-                let allCode = '';
-                this.allCodeBlocks.forEach((block, index) => {
-                    if (index > 0) allCode += '\n\n' + '='.repeat(50) + '\n\n';
-                    if (block.language && block.language !== 'text') {
-                        allCode += `// ${block.language.toUpperCase()}\n`;
-                    }
-                    allCode += block.code;
-                });
-                
-                title.textContent = `Coding Window - All Code from Conversation`;
-                content.textContent = allCode;
-                
-                this.currentCodeContent = allCode;
-                this.currentCodeLanguage = 'mixed';
+                this.currentCodeContent = block.code;
+                this.currentCodeLanguage = block.language;
                 
                 modal.classList.add('show');
                 document.body.style.overflow = 'hidden';
             }
 
+            /* REMOVED: The old openCodingWindow function is no longer needed. */
+            
             closeCodeViewer() {
                 const modal = document.getElementById('codeViewerModal');
                 modal.classList.remove('show');
@@ -1416,78 +1377,36 @@
 
             async copyCodeContent() {
                 if (!this.currentCodeContent) return;
-                
                 try {
                     await navigator.clipboard.writeText(this.currentCodeContent);
                     this.showSuccess('📋 Code copied to clipboard!');
                 } catch (err) {
-                    console.error('Failed to copy code:', err);
-                    // Fallback
-                    const textArea = document.createElement('textarea');
-                    textArea.value = this.currentCodeContent;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        this.showSuccess('📋 Code copied to clipboard!');
-                    } catch (fallbackErr) {
-                        this.showError('❌ Failed to copy code');
-                    }
-                    document.body.removeChild(textArea);
+                    this.showError('❌ Failed to copy code');
                 }
             }
 
             downloadCode() {
                 if (!this.currentCodeContent) return;
-                
-                const extension = this.getFileExtension(this.currentCodeLanguage);
+                const extensions = { 'javascript': 'js', 'python': 'py', 'html': 'html', 'css': 'css', 'java': 'java', 'cpp': 'cpp', 'sql': 'sql', 'json': 'json', 'typescript': 'ts' };
+                const extension = extensions[this.currentCodeLanguage.toLowerCase()] || 'txt';
+
                 const blob = new Blob([this.currentCodeContent], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
-                
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `code_snippet_${new Date().toISOString().split('T')[0]}.${extension}`;
-                document.body.appendChild(a);
+                a.download = `code_snippet.${extension}`;
                 a.click();
-                document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
                 this.showSuccess('💾 Code downloaded successfully!');
-            }
-
-            getFileExtension(language) {
-                const extensions = {
-                    'javascript': 'js',
-                    'python': 'py',
-                    'html': 'html',
-                    'css': 'css',
-                    'java': 'java',
-                    'cpp': 'cpp',
-                    'c': 'c',
-                    'php': 'php',
-                    'sql': 'sql',
-                    'json': 'json',
-                    'xml': 'xml',
-                    'yaml': 'yml',
-                    'markdown': 'md',
-                    'typescript': 'ts',
-                    'jsx': 'jsx',
-                    'tsx': 'tsx'
-                };
-                return extensions[language.toLowerCase()] || 'txt';
             }
             
             setGeneratingState(isGenerating) {
                 this.isGenerating = isGenerating;
                 this.chatInput.disabled = isGenerating || !this.apiKeyInput.value.trim();
-                this.sendButton.disabled = isGenerating || !this.apiKeyInput.value.trim() || !this.chatInput.value.trim();
                 this.sendButton.style.display = isGenerating ? 'none' : 'flex';
                 this.stopButton.style.display = isGenerating ? 'flex' : 'none';
-                
-                if (!isGenerating) {
-                    this.chatInput.focus();
-                    this.updateSendButtonState();
-                }
+                this.updateSendButtonState();
+                if (!isGenerating) this.chatInput.focus();
             }
 
             updateSendButtonState() {
@@ -1506,11 +1425,7 @@
             showError(message) {
                 this.errorMessage.innerHTML = message;
                 this.errorMessage.style.display = 'block';
-                
-                // Auto-hide after 5 seconds
-                setTimeout(() => {
-                    this.hideError();
-                }, 5000);
+                setTimeout(() => this.hideError(), 5000);
             }
 
             hideError() {
@@ -1519,108 +1434,78 @@
             
             async copyToClipboard(text, button) {
                 try {
-                    // Remove HTML tags for clean text copy
-                    const cleanText = text.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
+                    const cleanText = new DOMParser().parseFromString(text, 'text/html').body.textContent || "";
                     await navigator.clipboard.writeText(cleanText);
-                    
                     button.classList.add('copied');
-                    button.innerHTML = `
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                        </svg>
-                    `;
+                    button.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
                     button.setAttribute('data-tooltip', 'Copied!');
-                    
                     setTimeout(() => {
                         button.classList.remove('copied');
-                        button.innerHTML = `
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-                            </svg>
-                        `;
-                        button.setAttribute('data-tooltip', 'Copy to clipboard');
+                        button.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
+                        button.setAttribute('data-tooltip', 'Copy');
                     }, 2000);
-                } catch (err) {
-                    console.error('Failed to copy text: ', err);
-                    button.setAttribute('data-tooltip', 'Failed to copy!');
-                    
-                    // Fallback for older browsers
-                    const textArea = document.createElement('textarea');
-                    textArea.value = text.replace(/<[^>]*>/g, '');
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        button.setAttribute('data-tooltip', 'Copied!');
-                    } catch (fallbackErr) {
-                        button.setAttribute('data-tooltip', 'Copy not supported');
-                    }
-                    document.body.removeChild(textArea);
-                }
+                } catch (err) { this.showError('❌ Failed to copy'); }
             }
 
             scrollToBottom() {
-                requestAnimationFrame(() => {
-                    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-                });
+                requestAnimationFrame(() => { this.chatMessages.scrollTop = this.chatMessages.scrollHeight; });
             }
 
-            // Clear chat history
             clearChat() {
                 this.history = [];
-                this.chatMessages.innerHTML = `
-                    <div class="welcome-message-container">
-                        <div class="welcome-title">Chat Cleared ✨</div>
-                        <div class="welcome-subtitle">Ready for a new conversation!</div>
-                        <div class="welcome-features">
-                            <div class="feature-card">
-                                <div class="feature-title">🚀 Fresh Start</div>
-                                <div class="feature-description">Your chat history has been cleared</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                this.welcomeContainer = document.querySelector('.welcome-message-container');
+                this.allCodeBlocks = [];
+                this.chatMessages.innerHTML = ''; 
+                const welcomeMessage = document.createElement('div');
+                welcomeMessage.innerHTML = `<div class="welcome-message-container"><div class="welcome-title">Chat Cleared ✨</div><div class="welcome-subtitle">Ready for a new conversation!</div></div>`;
+                this.chatMessages.appendChild(welcomeMessage);
+                this.welcomeContainer = this.chatMessages.querySelector('.welcome-message-container');
             }
 
-            // Export chat history
             exportChat() {
-                const chatData = {
-                    timestamp: new Date().toISOString(),
-                    messages: this.history,
-                    exportedBy: 'TextGen-AI Chat Enhanced'
-                };
-                
+                if (this.history.length === 0) {
+                    this.showError('❌ Nothing to export.');
+                    return;
+                }
+                const chatData = { timestamp: new Date().toISOString(), messages: this.history };
                 const blob = new Blob([JSON.stringify(chatData, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
-                
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = `gemini-chat-${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
                 a.click();
-                document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
                 this.showSuccess('📥 Chat exported successfully!');
+            }
+            
+            importChat() {
+                const fileInput = document.getElementById('fileInput');
+                fileInput.onchange = (e) => this.handleFileImport(e);
+                fileInput.click();
+            }
+
+            handleFileImport(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (!importedData.messages || !Array.isArray(importedData.messages)) throw new Error("Invalid chat file format.");
+                        this.clearChat(); 
+                        this.history = importedData.messages;
+                        this.chatMessages.innerHTML = '';
+                        this.history.forEach(message => this.addMessage(message.role === 'model' ? 'ai' : 'user', message.parts[0].text));
+                        this.showSuccess('📤 Chat imported successfully!');
+                    } catch (error) { this.showError(`❌ Import failed: ${error.message}`); } 
+                    finally { event.target.value = ''; }
+                };
+                reader.readAsText(file);
             }
 
             showSuccess(message) {
-                // Create temporary success message
                 const successDiv = document.createElement('div');
-                successDiv.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: rgba(0, 255, 136, 0.2);
-                    color: var(--success-color);
-                    padding: 12px 20px;
-                    border-radius: 8px;
-                    border: 1px solid var(--success-color);
-                    backdrop-filter: blur(10px);
-                    z-index: 1000;
-                    animation: slideInRight 0.3s ease-out;
-                `;
+                successDiv.style.cssText = `position: fixed; top: 20px; right: 20px; background: rgba(0, 255, 136, 0.2); color: var(--success-color); padding: 12px 20px; border-radius: 8px; border: 1px solid var(--success-color); backdrop-filter: blur(10px); z-index: 1000; animation: slideInRight 0.3s ease-out;`;
                 successDiv.textContent = message;
                 document.body.appendChild(successDiv);
                 
@@ -1631,122 +1516,20 @@
             }
         }
 
-        // Enhanced keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Ctrl/Cmd + Enter to send message
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                const sendButton = document.getElementById('sendButton');
-                if (!sendButton.disabled) {
-                    sendButton.click();
-                }
-            }
-            
-            // Escape to stop generation or close code viewer
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') document.getElementById('sendButton')?.click();
             if (e.key === 'Escape') {
-                const stopButton = document.getElementById('stopButton');
                 const modal = document.getElementById('codeViewerModal');
-                
-                if (modal.classList.contains('show')) {
-                    window.geminiChat?.closeCodeViewer();
-                } else if (stopButton.style.display === 'flex') {
-                    stopButton.click();
-                }
-            }
-
-            // Ctrl/Cmd + K to clear chat
-            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                e.preventDefault();
-                window.geminiChat?.clearChat();
-            }
-
-            // Ctrl/Cmd + S to export chat
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                window.geminiChat?.exportChat();
+                if (modal.classList.contains('show')) window.geminiChat?.closeCodeViewer();
+                else document.getElementById('stopButton')?.click();
             }
         });
 
-        // Add additional CSS animations
         const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInRight {
-                from {
-                    opacity: 0;
-                    transform: translateX(100%);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
-            }
-
-            @keyframes slideOutRight {
-                from {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
-                to {
-                    opacity: 0;
-                    transform: translateX(100%);
-                }
-            }
-
-            .message-content a {
-                color: var(--success-color);
-                text-decoration: none;
-                border-bottom: 1px solid var(--success-color);
-                transition: all 0.2s ease;
-            }
-
-            .message-content a:hover {
-                color: #ffffff;
-                border-bottom-color: #ffffff;
-                transform: translateY(-1px);
-            }
-
-            .user .message-content a {
-                color: #000000;
-                border-bottom-color: #000000;
-            }
-
-            .user .message-content a:hover {
-                color: #333333;
-                border-bottom-color: #333333;
-            }
-        `;
+        style.textContent = `@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } } @keyframes slideOutRight { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }`;
         document.head.appendChild(style);
 
-        // Initialize the enhanced chat when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            window.geminiChat = new EnhancedGeminiChat();
-            
-            // Handle online/offline status
-            window.addEventListener('online', () => {
-                console.log('Connection restored');
-            });
-            
-            window.addEventListener('offline', () => {
-                window.geminiChat.showError('🌐 No internet connection detected');
-            });
-
-            // Add some visual feedback for user interactions
-            document.addEventListener('click', (e) => {
-                if (e.target.matches('button, .control-button')) {
-                    e.target.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        e.target.style.transform = '';
-                    }, 150);
-                }
-            });
-
-            // Close code viewer when clicking outside
-            document.addEventListener('click', (e) => {
-                const modal = document.getElementById('codeViewerModal');
-                if (e.target === modal) {
-                    window.geminiChat?.closeCodeViewer();
-                }
-            });
-        });
+        document.addEventListener('DOMContentLoaded', () => { window.geminiChat = new EnhancedGeminiChat(); });
     </script>
 </body>
 </html>
